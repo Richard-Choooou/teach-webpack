@@ -1,5 +1,5 @@
 # 前言
-对于现代web前端工程化，webpack起到了绝大的作用，此篇文章致力于让你学习webpack的配置，能够从无到有的配置一套属于自己的webpack配置。
+对于现代web前端工程化，webpack起到了绝大的作用，此篇文章致力于让你学习webpack的配置，能够从无到有的配置一套属于自己的webpack配置，此教程从基础配置，到优化两个纬度进行讲解，其中有大量的示例，文尾部分会提供git仓库以供代码下载。
 
 <!-- more -->
 
@@ -24,7 +24,7 @@
 ## 安装webpack
 在build目录下新建一个webpack.base.js文件，这个文件用于存放公共的webpack配置项，比如sass，babel什么的，因为一个工程可能不止一个需求，所以建立一个公共的配置项方便其他需求的配置。
 
-安装webpack依赖,推荐使用yarn
+安装webpack依赖，推荐使用yarn
 > npm i yarn -g
 
 > yarn add webpack --dev
@@ -91,8 +91,8 @@ new class{constructor(){alert(1)}}}
 
 入口文件的代码已经被打包了，但是还是之前的es6的代码，如果想要转换成es5，这就要用到babel了。
 
-## loaders
-webpack的loader作用是，loader将通过匹配规则匹配到的文件中的字符串，经过自己的处理后，再交给下一个loader处理，所以最终得到的文件，是一个自己需要的文件。
+## loaders & plugins
+webpack的loader作用是，loader通过正则表达式将匹配到的文件中的字符串，经过自己的处理后，再交给下一个loader处理，所以最终得到的文件，是一个自己需要的文件。
 
 ### bable-loader
 这里介绍babel-loader的配置，babel的作用是将低版本浏览器不支持的es6 7 8 的代码转换成可执行的es5代码，而babel-loader的作用是将匹配到的js文件交给babel转换器处理成es5的代码，再交给下一个loader，先安装babel相关的依赖
@@ -120,14 +120,14 @@ module.exports = {
     },
     module: {
         rules: [{
-            test: /.js$/,
+            test: /\.js$/,
             use: ['babel-loader']
         }]
     }
 }
 ```
 
-添加了一个module属性，其中有一个自动是rules，这里对应的需要匹配的文件，以及使用的loader，是一个数组，可以添加多个配置。
+添加了一个module属性，其中有一个字段是rules，值是一个数组，表示可以处理多种格式的文件。test是一个正则表达式，表示需要经过loader处理的文件类型。use对应的是需要使用的loader，是一个数组，可以添加多个loader，处理的顺序是，最后一个loader先处理，第一个loader最后处理，这个后面会详细讲解，现在不懂没关系。
 
 然后在项目根目录新建一个文件，名为 **.babelrc** ,内容如下：
 ```json
@@ -145,14 +145,20 @@ module.exports = {
 !function(e){var n={};function t(r){if(n[r])return n[r].exports;var o=n[r]={i:r,l:!1,exports:{}};return e[r].call(o.exports,o,o.exports,t),o.l=!0,o.exports}t.m=e,t.c=n,t.d=function(e,n,r){t.o(e,n)||Object.defineProperty(e,n,{enumerable:!0,get:r})},t.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},t.t=function(e,n){if(1&n&&(e=t(e)),8&n)return e;if(4&n&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(t.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&n&&"string"!=typeof e)for(var o in e)t.d(r,o,function(n){return e[n]}.bind(null,o));return r},t.n=function(e){var n=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(n,"a",n),n},t.o=function(e,n){return Object.prototype.hasOwnProperty.call(e,n)},t.p="./",t(t.s=0)}([function(e,n){new function e(){!function(e,n){if(!(e instanceof n))throw new TypeError("Cannot call a class as a function")}(this,e),alert(1)}}]);
 ```
 
-可以看看 es6 的 class 语法已经转换成了es5的代码，至此，babel就配置成功了。一个web前端项目肯定是少不了html文件的，所以结下来教大家处理html文件。
+在文件的最后，可以看到 es6 的 class 语法已经转换成了es5的代码，至此，babel就配置成功了。
+
+其次一个web前端项目肯定是少不了html文件的，所以接下来教大家处理html文件。
 
 ### html-loader 以及 html-webpack-plugin
-html-loader可以解析html文档中的图片资源，交给其他的loader处理，如url-loader或者是file-loader处理。html-webpacl-plugin的功能是将一个html作为模版，打包完成后会将打包后的资源比如js css，自动添加进html文档中。首先进行安装
+html-loader可以解析html文档中的图片资源，交给其他的loader处理，如url-loader或者是file-loader等。
+
+html-webpacl-plugin的功能是将一个html作为模版，打包完成后会将打包后的资源比如js css，自动添加进html文档中。
+
+首先进行安装：
 
 > yarn add html-loader html-webpack-plugin --dev
 
-再向webpack.base.config中添加一下配置：
+再向webpack.base.config中添加以下配置：
 ```js
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -193,7 +199,7 @@ module.exports = {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>learn webpack</title>
 </head>
 <body>
     
@@ -210,7 +216,7 @@ module.exports = {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>learn webpack</title>
 </head>
 <body>
     
@@ -218,7 +224,7 @@ module.exports = {
 </html>
 ```
 
-在浏览器中打开项目，已经可以正常运行了。
+在浏览器中打开index.html，已经可以正常运行了。
 
 ![wx20181008-171737](https://user-images.githubusercontent.com/23492006/46601033-9d1a3d00-cb1e-11e8-8753-fe74d3feb883.png)
 
@@ -271,7 +277,7 @@ module.exports = {
 
 这里我们同时匹配了css 以及scss文件，因为scss是css的一个超集，所以sass-loader也可以解析css文件，减少了不必要的配置。
 
-再看看使用的loader的顺序，值得注意的是，在这个数组中，webpack使用的loader是倒叙执行的，也是就是先执行的sass-loader再执行的css-loader，其次才是style-loader，要是反过来，是会报错的哦。
+再看看使用的loader的顺序，值得注意的是，在这个数组中，webpack使用的loader是倒序执行的，也是就是先执行的sass-loader再执行的css-loader，其次才是style-loader，要是反过来，是会报错的哦。
 
 执行 build 命令得到以下代码：
 ```js
@@ -298,7 +304,7 @@ const getPathByRoot = function(targetPath) {
 module.exports = {
     entry: getPathByRoot('src/index.js'),
     output: {
-        filename: 'static/index.[hash].js',
+        filename: 'static/js/index.[hash].js',
         path: getPathByRoot('dist'),
         publicPath: './'
     },
@@ -320,7 +326,7 @@ module.exports = {
         }),
 
         new MiniCssExtractPlugin({
-            filename: 'static/index.[hash].css'
+            filename: 'static/css/main.[hash].css'
         })
     ]
 }
@@ -330,6 +336,7 @@ module.exports = {
 
 执行打包命令后，可以看见，dist目录下static目录中多了一个index.css文件，并且index.html也自动引入了这个css文件，并且js文件的体积也小了很多。
 
+![a1](https://user-images.githubusercontent.com/23492006/46661600-159aff80-cbec-11e8-9ac8-552c25f68e0d.png)
 
 ### file-loader url-loader
 对于文件的处理，可以使用 **url-loader** 和 **file-loader**，**url-loader** 可以将很小的icon文件转换成base64编码内联进js文件中，这样可以减少http的请求次数，**file-loader** 可以制定一个可以让文件输出的路径便于管理，更加好用的功能是可以使用import 或者 require 图片文件。首先安装依赖：
@@ -349,16 +356,16 @@ const getPathByRoot = function (targetPath) {
 module.exports = {
     entry: getPathByRoot('src/index.js'),
     output: {
-        filename: 'static/index.[hash].js',
+        filename: 'static/js/index.[hash].js',
         path: getPathByRoot('dist'),
         publicPath: './'
     },
     module: {
         rules: [{
-            test: /.js$/,
+            test: /\.js$/,
             use: ['babel-loader']
         }, {
-            test: /.html$/,
+            test: /\.html$/,
             use: ['html-loader']
         }, {
             test: /.(sc|c)ss$/,
@@ -384,7 +391,7 @@ module.exports = {
         }),
 
         new MiniCssExtractPlugin({
-            filename: 'static/index.[hash].css'
+            filename: 'static/css/main.[hash].css'
         })
     ]
 }
@@ -392,9 +399,547 @@ module.exports = {
 
 可以看见首先对于文件，使用了url-loader，如果文件体积小于8192b 也就是 8kb 左右，那么url-loader会将图片转换为base64内联进js文件中，如果文件大于设定的值，那么就会将文件交给file-loader处理，并且将options选项交给file-loader这个是url的使用方式。
 
-做一个实验，在index.html文件中添加一个img标签,执行打包。如果图片大于8kb图片会被存储到dist/static/images目录下，如果文件小于8kb，那么文件会被内联到Html或者js中,这取决于是哪个类型的文件引用了这张图片。
+做一个实验，在index.html文件中添加一个img标签,执行打包。如果图片大于8kb图片会被存储到dist/static/images目录下。
 
-到这一步，一个项目最基础的几个功能都已经配置完成了，但是光是这样怎么行，没法高效率的开发，接下来就要介绍dev-server的用法了。
+![a3](https://user-images.githubusercontent.com/23492006/46662422-f7ce9a00-cbed-11e8-94e3-dead0563e668.png)
+
+如果文件小于8kb，那么文件会被内联到Html或者js中,这取决于是哪个类型的文件引用了这张图片。
+
+![a2](https://user-images.githubusercontent.com/23492006/46662329-b211d180-cbed-11e8-8d36-e7caefad9780.png)
+
+
+到这一步，一个项目最基础的几个功能都已经配置完成了，但是只是这样怎么行，没法高效率的开发，接下来就要介绍webpack-dev-server的用法了。
 
 ## HotModuleReplacementPlugin
+热模块加载依赖于 **webpack-dev-server**，首先安装
+
+> yarn add webpack-dev-server --dev
+
+接下来进行webpack的配置：
+
+```js
+const path = require('path')
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+const getPathByRoot = function (targetPath) {
+    path.resolve(__dirname, '../', targetPath)
+}
+
+module.exports = {
+    entry: getPathByRoot('src/index.js'),
+    output: {
+        filename: 'static/js/index.[hash].js',
+        path: getPathByRoot('dist'),
+        publicPath: './'
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: ['babel-loader']
+        }, {
+            test: /\.html$/,
+            use: ['html-loader']
+        }, {
+            test: /\.(sc|c)ss$/,
+            // use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+            use: ['style-loader', 'css-loader', 'sass-loader']
+        }, {
+            test: /\.(png|jpg|gif)$/,
+            use: [
+                {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 8192,
+                        name: '[name].[hash].[ext]',
+                        outputPath: 'static/images',
+                        fallback: 'file-loader',
+                    }
+                }
+            ]
+        }]
+    },
+    devtool: 'inline-source-map',
+    devServer: {
+        host: '0.0.0.0',
+        publicPath: '/',
+        hot: true,
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: 'index.html'
+        }),
+
+        new MiniCssExtractPlugin({
+            filename: 'static/css/index.[hash].css'
+        }),
+
+        new webpack.HotModuleReplacementPlugin()
+    ]
+}
+```
+
+首先require了webpack模块，因为 **HotModuleReplacementPlugin** 是webpack内置的插件，所以不用引入。
+
+其次将css解析的loader中，移除了 **MiniCssExtractPlugin.loader** ，改成了 **style-loader** ,将样式内联进html文档，这样做是为了热更新，如果是用了抽离css的 **MiniCssExtractPlugin.loader** ，就无法热更新了(之前配置是可以热更新的，但这次遇到了未知的情况，所以换一个处理方式)，不过这个问题，后期可以将开发以及生产的webpack分开配置来实现不同的需求。
+
+然后添加了这些配置项
+```json
+{
+    devtool: 'inline-source-map',
+    devServer: {
+        host: '0.0.0.0',
+        publicPath: '/',
+        hot: true,
+    }
+}
+```
+
+**inline-source-map** 的作用为将js文件打包后同时生成source map文件用于开发时的debugger，生产环境下建议不配置，后期也会将它抽离出公共的配置。 **devServer** 是用于配置开发环境下的配置项，更多的参数可以查看官方文档，这里不做详细介绍。
+
+最后配置package.json的script，用于快速启动开发服务：
+
+```json
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config ./build/webpack.base.js --mode=production",
+    "dev": "webpack-dev-server --config ./build/webpack.base.js --mode=development --color --open"
+},
+```
+
+此时运行
+> npm run dev
+
+打开控制台提示的运行的地址
+> Project is running at http://localhost:8080/
+
+打开这个地址就能够看到站点了，同时修改js文件以及css文件，可以看见页面的同步更改。
+
+# 优化
+完成上面的步骤基本上已经可以进行开发和生产了，但是对于工程的优化可不能停下脚步，所以得进行以下步骤。
+
+## 抽离不同的配置项
+就像之前说过的，维护一个公共的配置项，非公共的配置项抽离成几个不同的功能以适应不同的需求。这里需要使用到webpack-merge功能，先进行依赖的安装
+
+> yarn add webpack-merge --dev
+
+新建三个文件，分别是 **webpack.pro.js** 用于配置打包生产环境的文件， **webpack.dev.js** 用于配置开发环境的文件，**utils** 用于抽离公共的工具函数。文件如下：
+
+```js
+// utils.js
+
+const path = require('path')
+
+module.exports.getPathByRoot = function (targetPath) {
+    return path.resolve(__dirname, '../', targetPath)
+}
+```
+
+```js
+// webpack.base.js
+
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const getPathByRoot = require('./utils').getPathByRoot
+
+module.exports = {
+    entry: getPathByRoot('src/index.js'),
+    output: {
+        filename: 'static/js/index.[hash].js',
+        path: getPathByRoot('dist'),
+        publicPath: './'
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: ['babel-loader']
+        }, {
+            test: /\.html$/,
+            use: ['html-loader']
+        }, {
+            test: /\.(png|jpg|gif)$/,
+            use: [
+                {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 8192,
+                        name: '[name].[hash].[ext]',
+                        outputPath: 'static/images',
+                        fallback: 'file-loader',
+                    }
+                }
+            ]
+        }]
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: 'index.html'
+        })
+    ]
+}
+```
+
+```js
+// webpack.pro.js
+
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const merge = require('webpack-merge')
+const webpackBaseConfig = require('./webpack.base')
+
+module.exports = merge(webpackBaseConfig, {
+    module: {
+        rules: [{
+            test: /\.(sc|c)ss$/,
+            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        }]
+    },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: 'static/css/index.[hash].css'
+        })
+    ]
+})
+```
+
+```js
+// webpack.dev.js
+
+const webpack = require('webpack')
+const merge = require('webpack-merge')
+const webpackBaseConfig = require('./webpack.base')
+
+module.exports = merge(webpackBaseConfig, {
+    module: {
+        rules: [{
+            test: /\.(sc|c)ss$/,
+            use: ['style-loader', 'css-loader', 'sass-loader']
+        }]
+    },
+    devtool: 'inline-source-map',
+    devServer: {
+        host: '0.0.0.0',
+        publicPath: '/',
+        hot: true,
+    },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin()
+    ]
+})
+```
+
+修改package.json的script：
+```json
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config ./build/webpack.pro.js --mode=production",
+    "dev": "webpack-dev-server --config ./build/webpack.dev.js --mode=development --color --open"
+}
+```
+
+主要是修改了使用的配置文件为pro 和 dev 文件。
+
+## 打包前删除之前的文件
+每次打包如果文件修改了，那么就会修改文件的hash值，所以文件不会存在冲突的情况，所以上一次打包的文件还会存在于dist目录，这样会造成打包后的文件过大不便于管理，也有可能因为浏览器缓存的原因，请求的是之前的文件，所以得将之前的打包文件删除掉，所以这里我们需要使用到 **clean-webpack-plugin**，首先安装依赖。
+
+> yarn add clean-webpack-plugin --dev
+
+然后修改配置项：
+
+```js
+// webpack.pro.js
+
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const merge = require('webpack-merge')
+const webpackBaseConfig = require('./webpack.base')
+const WebpackCleanPlugin = require('clean-webpack-plugin')
+const getPathByRoot = require('./utils').getPathByRoot
+
+module.exports = merge(webpackBaseConfig, {
+    module: {
+        rules: [{
+            test: /\.(sc|c)ss$/,
+            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        }]
+    },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: 'static/css/index.[hash].css'
+        }),
+
+        new WebpackCleanPlugin(getPathByRoot('./dist'), {
+            allowExternal: true
+        })
+    ]
+})
+```
+
+运行打包命令，可以看见在打包之前，删除了dist目录。
+
+## 打包后GZIP压缩静态资源
+gzip的压缩，可以极大的减少http请求的size，优化站点的加载速度，需进行以下配置:
+
+先安装依赖 **compression-webpack-plugin**
+
+> yarn add compression-webpack-plugin@1.1.12 --dev
+
+这里指定版本号为1.1.12，因为2.0的版本在我这个环境下报错了，所以使用1.1.12
+
+其次修改webpack配置：
+
+```js
+//webpack.pro.js
+
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const merge = require('webpack-merge')
+const webpackBaseConfig = require('./webpack.base')
+const WebpackCleanPlugin = require('clean-webpack-plugin')
+const CompressionPlugin = require("compression-webpack-plugin")
+const getPathByRoot = require('./utils').getPathByRoot
+
+module.exports = merge(webpackBaseConfig, {
+    module: {
+        rules: [{
+            test: /\.(sc|c)ss$/,
+            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        }]
+    },
+    plugins: [
+        new CompressionPlugin({
+            test: [/\.js$/, /\.css$/],
+            asset: '[path].gz',
+            algorithm: 'gzip'
+        }),
+        new MiniCssExtractPlugin({
+            filename: 'static/css/main.[hash].css'
+        }),
+
+        new WebpackCleanPlugin(getPathByRoot('./dist'), {
+            allowExternal: true
+        })
+    ]
+})
+
+```
+
+完成配置后就可以打包出gzip文件了，不过还得nginx服务器打开gzip的支持才行。
+
+## 查看webpack打包进度
+使用 **progress-bar-webpack-plugin** 插件，首先安装
+
+> yarn add progress-bar-webpack-plugin --dev
+
+其次修改webpack配置：
+```js
+// webpack.base.js
+
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const getPathByRoot = require('./utils').getPathByRoot
+
+module.exports = {
+    entry: getPathByRoot('src/index.js'),
+    output: {
+        filename: 'static/js/index.[hash].js',
+        path: getPathByRoot('dist'),
+        publicPath: './'
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            exclude: /\/node_modules/,
+            use: ['babel-loader']
+        }, {
+            test: /\.html$/,
+            use: ['html-loader']
+        }, {
+            test: /\.(png|jpg|gif)$/,
+            use: [
+                {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 8192,
+                        name: '[name].[hash].[ext]',
+                        outputPath: 'static/images',
+                        fallback: 'file-loader',
+                    }
+                }
+            ]
+        }]
+    },
+    plugins: [
+        new ProgressBarPlugin(),
+        new HtmlWebpackPlugin({
+            template: 'index.html'
+        })
+    ]
+}
+```
+
+进度条就添加了。
+
+## 抽离公共依赖项
+因为是模块式的开发，对于jquery vue等库的文件，需要多次引入，如果不提取公共依赖项，那么就会导致每个js文件中都会有这两个库的文件。如果提取出来，将会大大减少文件的体积，优化浏览器的下载速度，而且可以将公共依赖项设置成强缓存，可以进一步减少http请求的开支，下面我们就添加这个功能，代码如下：
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const getPathByRoot = require('./utils').getPathByRoot
+
+module.exports = {
+    entry: getPathByRoot('src/index.js'),
+    output: {
+        filename: 'static/js/index.[hash].js',
+        path: getPathByRoot('dist'),
+        publicPath: './'
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            exclude: /\/node_modules/,
+            use: ['babel-loader']
+        }, {
+            test: /\.html$/,
+            use: ['html-loader']
+        }, {
+            test: /\.(png|jpg|gif)$/,
+            use: [
+                {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 8192,
+                        name: '[name].[hash].[ext]',
+                        outputPath: 'static/images',
+                        fallback: 'file-loader',
+                    }
+                }
+            ]
+        }]
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            name: 'commons',
+            filename: 'static/js/[name].[hash].js'
+        }
+    },
+    plugins: [
+        new ProgressBarPlugin(),
+        new HtmlWebpackPlugin({
+            template: 'index.html'
+        })
+    ]
+}
+```
+
+因为在webpack4.0中提取公共文件已经是内置功能了，所以不需要插件。只需要在配置文件中插入这样的一个配置就行：
+
+```json
+optimization: {
+    splitChunks: {
+        chunks: 'all',
+        name: 'commons',
+        filename: 'static/js/[name].[hash].js'
+    }
+},
+```
+
+安装jqery 和 vue进行一次测试
+> yarn add jquery vue
+
+然后在src/index.js中引入这两个库文件。
+
+```js
+import './index.scss'
+import $ from 'jquery'
+import Vue from 'vue'
+
+new Vue({
+    el: '#app'
+})
+
+$('#app').on('click', function() {
+    
+})
+```
+
+运行打包命令后查看js文件会发现多出了一个common.js文件，打开可以看见内容只包含了jquery 和 vue 的源码，打开打包后的index.html也可以看见引入了common.js文件，说明提取公共依赖项成功了。
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+<link href="./static/css/main.bf73755b575b70e4fc39.css" rel="stylesheet"></head>
+<body>
+    <img src="./static/images/WechatIMG5.72047b6d3b0f1c1f1dc0a1fa9c81188f.png" alt="">
+    <script type="text/javascript" src="./static/js/commons.bf73755b575b70e4fc39.js"></script>
+    <script type="text/javascript" src="./static/js/index.bf73755b575b70e4fc39.js"></script>
+</body>
+</html>
+```
+
+![a4](https://user-images.githubusercontent.com/23492006/46663106-d1a9f980-cbef-11e8-8e21-3deac19b522e.png)
+
+## 查看打包后的文件结构
+
+使用 **webpack-bundle-analyzer** 插件，可以查看到打包后的js文件的内部细节，可以很清楚的分析哪些细节可以优化，首先安装依赖。
+
+> yarn add webpack-bundle-analyzer --dev
+
+然后进行webpack配置
+
+```js
+//webpack.pro.js
+
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const merge = require('webpack-merge')
+const webpackBaseConfig = require('./webpack.base')
+const WebpackCleanPlugin = require('clean-webpack-plugin')
+const CompressionPlugin = require("compression-webpack-plugin")
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const getPathByRoot = require('./utils').getPathByRoot
+
+module.exports = merge(webpackBaseConfig, {
+    module: {
+        rules: [{
+            test: /\.(sc|c)ss$/,
+            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        }]
+    },
+    plugins: [
+        new CompressionPlugin({
+            test: [/\.js$/, /\.css$/],
+            asset: '[path].gz',
+            algorithm: 'gzip'
+        }),
+        new MiniCssExtractPlugin({
+            filename: 'static/css/main.[hash].css'
+        }),
+
+        new WebpackCleanPlugin(getPathByRoot('./dist'), {
+            allowExternal: true
+        }),
+
+        new BundleAnalyzerPlugin()
+    ]
+})
+```
+
+运行打包后会打开浏览器有以下界面，可以很清楚的看见js文件的内容：
+![wx20181009-172315](https://user-images.githubusercontent.com/23492006/46659849-51cc6100-cbe8-11e8-9248-d9e79d36efaa.png)
+
+借用官方文档的动图，可以看见更直观的细节：
+![gif](https://cloud.githubusercontent.com/assets/302213/20628702/93f72404-b338-11e6-92d4-9a365550a701.gif)
+
+# 结尾
+到这里，基本的配置都已经完成了，如果你想实现更多的功能，就需要自己去探索啦。
+工程地址：https://github.com/Richard-Choooou/teach-webpack
+
+例外有两个之前配置的webpack脚手架可以看一看：
+
+用于vue组件系统开发的webpack配置： https://github.com/Richard-Choooou/vue-component-webpack
+
+多页面开发的webpack配置：https://github.com/Richard-Choooou/mpa-webpack4.0-config
 
