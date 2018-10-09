@@ -310,13 +310,13 @@ module.exports = {
     },
     module: {
         rules: [{
-            test: /.js$/,
+            test: /\.js$/,
             use: ['babel-loader']
         }, {
-            test: /.html$/,
+            test: /\.html$/,
             use: ['html-loader']
         }, {
-            test: /.(sc|c)ss$/,
+            test: /\.(sc|c)ss$/,
             use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
         }]
     },
