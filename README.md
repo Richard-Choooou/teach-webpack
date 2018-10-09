@@ -44,13 +44,13 @@ const getPathByRoot = function(targetPath) {
 module.exports = {
     entry: getPathByRoot('src/index.js'),
     output: {
-        filename: './static/index.js',
+        filename: './static/index.[hash].js',
         path: getPathByRoot('dist'),
         publicPath: './'
     }
 }
 ```
-这是一个最简单的配置，引入了 node 的path模块，用于路径解析，定义了webpack入口文件，以及出口的路径及文件名。
+这是一个最简单的配置，引入了 node 的path模块，用于路径解析，定义了webpack入口文件，以及出口的路径及文件名，注意文件名后面有一个[hash]，这个的作用是给打包后的文件添加一个hash值，用户解决浏览器缓存的问题。
 
 再看看入口文件。
 ```js
@@ -114,7 +114,7 @@ const getPathByRoot = function(targetPath) {
 module.exports = {
     entry: getPathByRoot('src/index.js'),
     output: {
-        filename: './static/index.js',
+        filename: './static/index.[hash].js',
         path: getPathByRoot('dist'),
         publicPath: './'
     },
@@ -223,7 +223,7 @@ module.exports = {
 ![wx20181008-171737](https://user-images.githubusercontent.com/23492006/46601033-9d1a3d00-cb1e-11e8-8753-fe74d3feb883.png)
 
 ### css预处理器
-预处理器作为前端css高效的工具，不可不用，这一节教学sass的安装与配置。首先安装sass的依赖以及style-loader。
+预处理器作为前端css高效的工具，不可不用，这一节教学sass的安装与配置。首先安装css sass的依赖以及style-loader。
 
 > yarn add node-sass sass-loader css-loader style-loader --dev
 
@@ -328,7 +328,7 @@ module.exports = {
 
 在plugins中实例化了 **MiniCssExtractPlugin** 并且设置了打包后的名称，以及在rules中修改了最终的loader。
 
-执行打包命令后，可以看见，dist目录下static目录中多了一个index.css文件，并且index.html也自动引入了这个css文件，并且js文件的体积也小了很多。有一点忘记提到的是，可以在filename的值中添加[hash]这一字符串，可以将输出的文件添加一个hash值，以免浏览器获取到的是之前的缓存。
+执行打包命令后，可以看见，dist目录下static目录中多了一个index.css文件，并且index.html也自动引入了这个css文件，并且js文件的体积也小了很多。
 
 
 ### file-loader url-loader
@@ -390,6 +390,11 @@ module.exports = {
 }
 ```
 
-可以看见首先对于文件，使用file-loader处理，然后交给url-loader，如果文件体积小于8192b 也就是 8kb 左右，那么url-loader会将图片转换为base64内联进js文件中。
+可以看见首先对于文件，使用了url-loader，如果文件体积小于8192b 也就是 8kb 左右，那么url-loader会将图片转换为base64内联进js文件中，如果文件大于设定的值，那么就会将文件交给file-loader处理，并且将options选项交给file-loader这个是url的使用方式。
 
-做一个实验，在index.html文件中添加一个img标签,执行打包。如果图片大于8kb图片会被存储到dist/static/images目录下，如果文件小于8kb，那么文件会被内联到Html或者js中,着取决于是哪个类型的文件引用了这张图片。
+做一个实验，在index.html文件中添加一个img标签,执行打包。如果图片大于8kb图片会被存储到dist/static/images目录下，如果文件小于8kb，那么文件会被内联到Html或者js中,这取决于是哪个类型的文件引用了这张图片。
+
+到这一步，一个项目最基础的几个功能都已经配置完成了，但是光是这样怎么行，没法高效率的开发，接下来就要介绍dev-server的用法了。
+
+## HotModuleReplacementPlugin
+

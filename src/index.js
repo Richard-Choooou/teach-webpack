@@ -1,9 +1,11 @@
 import './index.scss'
+import $ from 'jquery'
+import Vue from 'vue'
 
-class Test {
-    constructor() {
-        alert(1)
-    }
-}
+new Vue({
+    el: '#app'
+})
 
-new Test()
+$('#app').on('click', function() {
+
+})

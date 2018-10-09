@@ -1,28 +1,22 @@
-const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-
-const getPathByRoot = function (targetPath) {
-    path.resolve(__dirname, '../', targetPath)
-}
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const getPathByRoot = require('./utils').getPathByRoot
 
 module.exports = {
     entry: getPathByRoot('src/index.js'),
     output: {
-        filename: 'static/index.[hash].js',
+        filename: 'static/js/index.[hash].js',
         path: getPathByRoot('dist'),
         publicPath: './'
     },
     module: {
         rules: [{
-            test: /.js$/,
+            test: /\.js$/,
+            exclude: /\/node_modules/,
             use: ['babel-loader']
         }, {
-            test: /.html$/,
+            test: /\.html$/,
             use: ['html-loader']
-        }, {
-            test: /.(sc|c)ss$/,
-            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
         }, {
             test: /\.(png|jpg|gif)$/,
             use: [
@@ -38,13 +32,17 @@ module.exports = {
             ]
         }]
     },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            name: 'commons',
+            filename: 'static/js/[name].[hash].js'
+        }
+    },
     plugins: [
+        new ProgressBarPlugin(),
         new HtmlWebpackPlugin({
             template: 'index.html'
-        }),
-
-        new MiniCssExtractPlugin({
-            filename: 'static/index.[hash].css'
         })
     ]
 }
